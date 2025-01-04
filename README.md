@@ -21,6 +21,7 @@ pip install 'git+https://github.com/katsura-jp/pytorch-cosine-annealing-with-war
 - last_epoch (int): The index of last epoch. Default: -1.
 
 ## Example
+### CosineAnnealingWarmupRestarts
 ```
 >> from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 >>
@@ -43,3 +44,23 @@ pip install 'git+https://github.com/katsura-jp/pytorch-cosine-annealing-with-war
 ![example1](./src/plot001.png "example1")
 - case2 : `CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=200, cycle_mult=1.0, max_lr=0.1, min_lr=0.001, warmup_steps=50, gamma=0.5)`
 ![example2](./src/plot002.png "example2")
+
+### CosineAnnealingRateWarmupRestarts
+```
+>> from cosine_annealing_warmup import CosineAnnealingRateWarmupRestarts
+>>
+>> model = ...
+>> optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-5) # lr is min lr
+>> scheduler = CosineAnnealingRateWarmupRestarts(optimizer,
+                                          first_cycle_steps=100,
+                                          cycle_mult=2.0,
+                                          max_lr=0.1,
+                                          min_lr=0.001,
+                                          warmup_rate=0.1,
+                                          gamma=1.0)
+>> for epoch in range(n_epoch):
+>>     train()
+>>     valid()
+>>     scheduler.step()
+```
+- case1 : `CosineAnnealingRateWarmupRestarts(optimizer, first_cycle_steps=100, cycle_mult=2.0, max_lr=0.1, min_lr=0.001, warmup_rate=0.1, gamma=1.0)`
