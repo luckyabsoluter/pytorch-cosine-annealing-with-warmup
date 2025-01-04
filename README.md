@@ -17,7 +17,7 @@ pip install 'git+https://github.com/katsura-jp/pytorch-cosine-annealing-with-war
 - cycle_mult(float): Cycle steps magnification. Default: 1.
 - max_lr(float): First cycle's max learning rate. Default: 0.1.
 - min_lr(float): Min learning rate. Default: 0.001.
-- warmup_steps(int): Linear warmup step size. Default: 0.
+- **warmup_steps(int)**: Linear warmup step size. Default: 0.
 - gamma(float): Decrease rate of max learning rate by cycle. Default: 1.
 - last_epoch (int): The index of last epoch. Default: -1.
 
@@ -27,7 +27,7 @@ pip install 'git+https://github.com/katsura-jp/pytorch-cosine-annealing-with-war
 - cycle_mult(float): Cycle steps magnification. Default: -1.
 - max_lr(float): First cycle's max learning rate. Default: 0.1.
 - min_lr(float): Min learning rate. Default: 0.001.
-- warmup_rate(float): Linear warmup rate of the current cycle's step size. Default: 0.
+- **warmup_rate(float)**: Linear warmup rate of the current cycle's step size. Default: 0.
 - gamma(float): Decrease rate of max learning rate by cycle. Default: 1.
 - last_epoch (int): The index of last epoch. Default: -1.
 
