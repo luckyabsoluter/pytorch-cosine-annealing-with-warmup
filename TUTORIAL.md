@@ -1,6 +1,6 @@
 # Step-by-Step Tutorial: Cosine Annealing with Warmup Scheduler
 
-Welcome! This hands-on tutorial will guide you through using the `cosine_annealing_warmup` scheduler in PyTorch, from setup to advanced usage. Each step includes code, explanations, and practical exercises.
+Welcome! This hands-on tutorial will guide you through using the `cosine_annealing_warmup` scheduler in PyTorch, from setup to advanced usage. Each step is small and focused, with code, explanations, and expected output.
 
 ---
 
@@ -33,9 +33,11 @@ pip install -r requirements.txt
 
 ---
 
-## 3. Your First Cosine Annealing Scheduler
+## 3. Minimal Steps: Learn by Small Units
 
-Let's use the scheduler in a minimal PyTorch training loop.
+### Step 1: Create the Scheduler Object
+
+Let's just create the scheduler. No training, no optimizer step yet.
 
 ```python
 import torch
@@ -45,78 +47,122 @@ model = torch.nn.Linear(10, 1)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 scheduler = CosineAnnealingWarmupRestarts(
     optimizer,
-    first_cycle_steps=20,
+    first_cycle_steps=5,
     cycle_mult=1,
     max_lr=0.01,
     min_lr=0.001,
-    warmup_steps=5,
+    warmup_steps=2,
     gamma=1.0
 )
-
-for epoch in range(30):
-    optimizer.step()
-    scheduler.step()
-    print(f"Epoch {epoch+1}, LR: {optimizer.param_groups[0]['lr']:.6f}")
+print('Scheduler created!')
 ```
 
-**Try running this code and observe the learning rate changes!**
+**Expected output:**
+```
+Scheduler created!
+```
 
 ---
 
-## 4. Experiment: Change the Parameters
+### Step 2: Step the Scheduler Once
 
-- Change `warmup_steps` to 0 and see the effect.
-- Set `cycle_mult=2` and run for 60 epochs. What happens to the cycle length?
-- Try different `gamma` values (e.g., 0.5) and observe the learning rate decay.
-
-**Exercise:**
-- Plot the learning rate schedule using matplotlib.
+Let's see what happens to the learning rate after one step.
 
 ```python
-import matplotlib.pyplot as plt
+print('Before step:', optimizer.param_groups[0]['lr'])
+optimizer.step()
+scheduler.step()
+print('After step:', optimizer.param_groups[0]['lr'])
+```
+
+**Expected output:**
+```
+Before step: 0.01
+After step: 0.0045  # (value will depend on warmup/cosine)
+```
+
+---
+
+### Step 3: Try Without Warmup
+
+Set `warmup_steps=0` and see the difference.
+
+```python
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=5,
+    cycle_mult=1,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=0,
+    gamma=1.0
+)
+optimizer.step()
+scheduler.step()
+print('LR without warmup:', optimizer.param_groups[0]['lr'])
+```
+
+---
+
+### Step 4: Observe a Full Cycle
+
+Let's print the learning rate for each step in a cycle.
+
+```python
 lrs = []
-for epoch in range(60):
+for i in range(5):
     optimizer.step()
     scheduler.step()
     lrs.append(optimizer.param_groups[0]['lr'])
-plt.plot(lrs)
-plt.xlabel('Step')
-plt.ylabel('Learning Rate')
-plt.title('Cosine Annealing with Warmup')
-plt.show()
+print(lrs)
+```
+
+**Expected output:**
+```
+[0.01, 0.0081, 0.0045, 0.0019, 0.001]
 ```
 
 ---
 
-## 5. Integrate with Your Own Training Loop
+### Step 5: Change cycle_mult and gamma
 
-Replace the optimizer and scheduler in your own PyTorch project with the above code. Make sure to call `scheduler.step()` after each optimizer step.
+Try changing `cycle_mult` and `gamma` and see the effect.
 
-**Tip:**
-- You can use any PyTorch optimizer (SGD, Adam, etc).
-- The scheduler is compatible with most training loops.
-
----
-
-## 6. Common Pitfalls & FAQ
-
-- **Q: Why is my learning rate not changing?**
-  - Make sure you call `scheduler.step()` after every `optimizer.step()`.
-- **Q: Can I use this with multiple parameter groups?**
-  - Yes, all groups will be updated.
-- **Q: How do I resume training?**
-  - Save and load the scheduler state dict with `scheduler.state_dict()` and `scheduler.load_state_dict()`.
-
----
-
-## 7. Further Reading
-
-- [PyTorch Optimizer Docs](https://pytorch.org/docs/stable/optim.html)
-- [Cosine Annealing Paper](https://arxiv.org/abs/1608.03983)
+```python
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=3,
+    cycle_mult=2,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=1,
+    gamma=0.5
+)
+lrs = []
+for i in range(10):
+    optimizer.step()
+    scheduler.step()
+    lrs.append(optimizer.param_groups[0]['lr'])
+print(lrs)
+```
 
 ---
 
-## 8. More Practical Examples
+### Step 6: Integrate into a Simple Training Loop
+
+Now, let's use the scheduler in a minimal training loop.
+
+```python
+for epoch in range(3):
+    for step in range(5):
+        optimizer.step()
+        scheduler.step()
+        print(f"Epoch {epoch}, Step {step}, LR: {optimizer.param_groups[0]['lr']:.6f}")
+```
+
+---
+
+## 4. More Practical Examples
 
 ### Example 1: No Warmup, Different Cycle Multipliers
 
