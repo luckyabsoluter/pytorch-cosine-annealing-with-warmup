@@ -116,4 +116,141 @@ Replace the optimizer and scheduler in your own PyTorch project with the above c
 
 ---
 
+## 8. More Practical Examples
+
+### Example 1: No Warmup, Different Cycle Multipliers
+
+```python
+# No warmup, cycle_mult=1
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=20,
+    cycle_mult=1,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=0,
+    gamma=1.0
+)
+
+# No warmup, cycle_mult=2
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=10,
+    cycle_mult=2,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=0,
+    gamma=1.0
+)
+```
+
+### Example 2: Using Different Optimizers
+
+```python
+# Using SGD
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=20,
+    cycle_mult=1,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=5,
+    gamma=0.9
+)
+
+# Using AdamW
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.01)
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=20,
+    cycle_mult=1,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=5,
+    gamma=0.9
+)
+```
+
+### Example 3: Multiple Parameter Groups
+
+```python
+optimizer = torch.optim.Adam([
+    {'params': model.layer1.parameters(), 'lr': 0.01},
+    {'params': model.layer2.parameters(), 'lr': 0.001}
+])
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=20,
+    cycle_mult=1,
+    max_lr=0.01,
+    min_lr=0.0001,
+    warmup_steps=5,
+    gamma=0.8
+)
+```
+
+### Example 4: Real Dataset (MNIST)
+
+```python
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+
+transform = transforms.ToTensor()
+dataset = datasets.MNIST('.', download=True, transform=transform)
+dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+
+model = torch.nn.Linear(28*28, 10)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+scheduler = CosineAnnealingWarmupRestarts(
+    optimizer,
+    first_cycle_steps=100,
+    cycle_mult=1,
+    max_lr=0.01,
+    min_lr=0.001,
+    warmup_steps=10,
+    gamma=0.9
+)
+
+for epoch in range(5):
+    for images, labels in dataloader:
+        images = images.view(images.size(0), -1)
+        optimizer.zero_grad()
+        output = model(images)
+        loss = torch.nn.functional.cross_entropy(output, labels)
+        loss.backward()
+        optimizer.step()
+        scheduler.step()
+```
+
+### Example 5: Saving and Loading Scheduler State
+
+```python
+# Save
+torch.save(scheduler.state_dict(), 'scheduler.pt')
+# Load
+scheduler.load_state_dict(torch.load('scheduler.pt'))
+```
+
+### Example 6: Error Handling
+
+```python
+try:
+    scheduler = CosineAnnealingWarmupRestarts(
+        optimizer,
+        first_cycle_steps=0,  # Invalid, must be > 0
+        cycle_mult=1,
+        max_lr=0.01,
+        min_lr=0.001,
+        warmup_steps=0,
+        gamma=1.0
+    )
+except Exception as e:
+    print(f"Error: {e}")
+```
+
+---
+
 **Now try modifying the code, experiment, and apply the scheduler to your real projects!**
