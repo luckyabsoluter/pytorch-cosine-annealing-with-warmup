@@ -4,9 +4,16 @@
 
 ---
 
-## 1. 설치
+## 1. 프로젝트 클론 및 설치
 
-먼저, 프로젝트의 의존성을 설치하세요.
+먼저, GitHub에서 프로젝트를 클론하세요.
+
+```bash
+git clone https://github.com/your-username/pytorch-cosine-annealing-with-warmup.git
+cd pytorch-cosine-annealing-with-warmup
+```
+
+의존성 설치:
 
 ```bash
 pip install -r requirements.txt
